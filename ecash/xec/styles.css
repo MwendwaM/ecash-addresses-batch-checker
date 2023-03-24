@@ -1,0 +1,14 @@
+@media (max-width: 767px) {
+    body {
+        padding: 1rem;
+        font-size: 14px;
+    }
+    textarea {
+        font-size: 14px;
+    }
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}

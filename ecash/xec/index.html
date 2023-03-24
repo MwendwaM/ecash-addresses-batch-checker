@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/styles.css" rel="stylesheet">
+    <title>eCash Address Balances</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #000;
+            color: #0f0;
+            padding: 1rem;
+        }
+        textarea {
+            width: 100%;
+            margin-bottom: 1rem;
+            background-color: #000;
+            color: #0f0;
+            border: 1px solid #0f0;
+            resize: none;
+        }
+        button {
+            background-color: #0f0;
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #0f0;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        @media (max-width: 767px) {
+            body {
+                font-size: 14px;
+            }
+            textarea {
+                font-size: 14px;
+            }
+        }
+    </style>
+    <script>
+       async function fetchBalances() {
+    const input = document.getElementById("address-input").value;
+    const addresses = input.split(",").map((addr) => addr.trim()).filter((addr) => addr !== "");
+    if (addresses.length === 0) {
+        alert('Please enter at least one valid eCash address.');
+        return;
+    }
+    const apiUrl = `https://api.blockchair.com/ecash/dashboards/addresses/${addresses.join(",")}?key=A___0gXA5RTPqh9NpwqIhjzqwXCRAINE&limit=50`;
+
+    try {
+        let response = await fetch(apiUrl);
+        if (response.ok) {
+            let data = await response.json();
+            displayBalances(data.data.addresses);
+        } else {
+            console.error("Error:", response.status);
+        }
+    } catch (error) {
+        console.error("Error:", error.message);
+    }
+}
+
+        function displayBalances(addresses) {
+            const results = document.getElementById("results");
+            results.innerHTML = "";
+
+            for (const address in addresses) {
+                const balance = (addresses[address].balance / 100).toFixed(2);
+                const firstSeenReceiving = addresses[address].first_seen_receiving || "N/A";
+                const lastSeenSpending = addresses[address].last_seen_spending || "N/A";
+
+                const row = document.createElement("tr");
+                const addressCell = document.createElement("td");
+                const balanceCell = document.createElement("td");
+                const firstSeenReceivingCell = document.createElement("td");
+                const lastSeenSpendingCell = document.createElement("td");
+
+                addressCell.textContent = address;
+                balanceCell.textContent = balance;
+                firstSeenReceivingCell.textContent = firstSeenReceiving;
+                lastSeenSpendingCell.textContent = lastSeenSpending;
+
+                row.appendChild(addressCell);
+                row.appendChild(balanceCell);
+                row.appendChild(firstSeenReceivingCell);
+                row.appendChild(lastSeenSpendingCell);
+                results.appendChild(row);
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", function() {
+            const button = document.getElementById("get-balances");
+            button.addEventListener("click", fetchBalances);
+        });
+    </script>
+</head>
+<body
+     
+    <h1>eCash Address Balances</h1>
+    <textarea id="address-input" rows="10" placeholder="Enter eCash addresses separated by commas (max 50 addresses),eg:address1,address2,address3,address4..."></textarea>
+    <button id="get-balances">Get Balances</button>
+    <table>
+       <table style="overflow-x: auto;">
+        <thead>
+            <tr>
+                <th>Address</th>
+                <th>Balance</th>
+                <th>First Seen Receiving</th>
+                <th>Last Seen Spending</th>
+            </tr>
+        </thead>
+        <tbody id="results"></tbody>
+    </table>
+</body>
+</html>
